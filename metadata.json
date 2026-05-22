@@ -1,0 +1,6 @@
+{
+  "name": "AI WeChat Creator Hub",
+  "description": "基于AI大模型的微信公众号全流程高效创作工具，提供选题、写文章、排版排版、AI味审查、配图生成及草稿箱一站式方案。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
