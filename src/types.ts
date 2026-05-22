@@ -2,6 +2,7 @@ export interface NewsItem {
   title: string;
   hotVal: string;
   source: string;
+  sourceUrl?: string;
   summary: string;
   category: string;
 }

@@ -305,40 +305,72 @@ async function callUniversalAIModel(params: {
 
 // 1. Trending News Endpoint (获取最新实事新闻)
 app.post("/api/news/trending", async (req, res) => {
-  const customKey = req.headers["x-gemini-api-key"] as string | undefined;
-  if (!customKey || customKey.trim() === "" || customKey === "MY_GEMINI_API_KEY") {
-    return res.status(400).json({ error: "您未在中提供 Google Gemini API 密钥，拒绝拉取新闻大模型检索！请先在页面右上角添加 Key。" });
-  }
-
-  const ai = getAiClient(customKey);
-  if (!ai) {
-    return res.status(400).json({ error: "Gemini 客户端包初始化失败，请检查您的 Key 是否有误。" });
-  }
-
   try {
-    const prompt = `列出当前最新、最热的6个微信朋友圈与社交媒体爆款趋势话题。需要涵盖科技前沿、大厂动向、财经创见或现代生活。
+    const { category, sources, selectedAIModel = "gemini-3.5-flash" } = req.body;
+    let sourceQuery = "";
+    if (sources && Array.isArray(sources) && sources.length > 0) {
+      const sourceNames = sources.map((s: any) => s.name).join(", ");
+      sourceQuery = `请重点从以下新闻来源（${sourceNames}）中搜索获取最新热点。`;
+    }
+
+    const systemPrompt = `你是一个强大的全网新闻实时热点发现雷达。`;
+    const prompt = `列出当前最新、最热的6个社交媒体爆款趋势话题。${sourceQuery}
+需要涵盖科技前沿、大厂动向、财经创见或现代生活，且与用户选择的类别（${category || '全部'}）强相关。
+请注意：如果指定了来源，请尽力从指定的来源搜索。如果部分指定来源没有最新的突发新闻，可以用其他权威来源的热点作为补充，保证有6条结果。
 请严格采用纯JSON数组格式返回，不要写 markdown 标记，不要解释。格式结构如下：
 [
   {
     "title": "爆款标题/话题事件",
     "hotVal": "热度指数，例如 9.8万",
     "source": "来源，如微博、快科技、澎湃、36氪",
+    "sourceUrl": "该条热点新闻的真实网页链接(请使用真实URL)",
     "summary": "一到两句话深度对事件背景和传播核心槽点进行总结",
     "category": "分类标签，如“科技”、“商业”、“情感”、“社会”"
   }
 ]`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        tools: [{ googleSearch: {} }],
-      },
-    });
+    let responseText = "";
+    
+    // Check if it's gemini so we can inject googleSearch
+    if (selectedAIModel.toLowerCase().includes("gemini") || !selectedAIModel) {
+      const customKey = req.headers["x-gemini-api-key"] as string | undefined;
+      if (!customKey || customKey.trim() === "" || customKey === "MY_GEMINI_API_KEY") {
+        return res.status(400).json({ error: "您未提供 Google Gemini API 密钥，拒绝拉取新闻检索！请先在页面右上角配置 API Key。" });
+      }
+      const ai = getAiClient(customKey);
+      if (!ai) {
+        return res.status(400).json({ error: "Gemini 客户端包初始化失败，请检查您的 Key 是否有误。" });
+      }
+      const response = await ai.models.generateContent({
+        model: selectedAIModel || "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          systemInstruction: systemPrompt,
+          responseMimeType: "application/json",
+          tools: [{ googleSearch: {} }],
+        },
+      });
+      responseText = response.text || "";
+    } else {
+      // Use universal model call
+      const result = await callUniversalAIModel({
+        selectedAIModel,
+        systemInstruction: systemPrompt,
+        prompt,
+        headers: req.headers,
+        responseFormatJson: true
+      });
+      responseText = result.text;
+    }
 
-    const text = response.text || "";
-    const parsed = JSON.parse(text.trim());
+    // Clean response text to ensure JSON parity
+    let cleanedText = responseText.trim();
+    if (cleanedText.startsWith("```json")) {
+      cleanedText = cleanedText.replace(/^```json/, "").replace(/```$/, "").trim();
+    } else if (cleanedText.startsWith("```")) {
+      cleanedText = cleanedText.replace(/^```/, "").replace(/```$/, "").trim();
+    }
+    const parsed = JSON.parse(cleanedText);
     return res.json({ success: true, data: parsed, isMock: false });
   } catch (err: any) {
     console.error("News Search Error:", err);
