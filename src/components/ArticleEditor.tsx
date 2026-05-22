@@ -6,6 +6,7 @@ import { apiFetch } from "../lib/api";
 interface ArticleEditorProps {
   draft: ArticleDraft;
   selectedAIModel: string;
+  selectedAIModelName?: string;
   onUpdateDraftPatch: (patch: Partial<ArticleDraft>) => void;
   onNavigateToPreview: () => void;
 }
@@ -13,6 +14,7 @@ interface ArticleEditorProps {
 export default function ArticleEditor({
   draft,
   selectedAIModel,
+  selectedAIModelName,
   onUpdateDraftPatch,
   onNavigateToPreview
 }: ArticleEditorProps) {
@@ -400,7 +402,7 @@ export default function ArticleEditor({
             ✍️ 字数统计: <strong className="text-slate-600">{draft.content?.length || 0}</strong> 字符 (包含空格)
           </span>
           <span className="flex items-center gap-1">
-            🤖 当前生成模型：<strong className="text-rose-600 uppercase">{selectedAIModel}</strong>
+            🤖 当前生成模型：<strong className="text-rose-600 uppercase">{selectedAIModelName || selectedAIModel}</strong>
           </span>
         </div>
       </div>

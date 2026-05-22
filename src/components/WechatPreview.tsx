@@ -8,10 +8,11 @@ import { apiFetch } from "../lib/api";
 interface WechatPreviewProps {
   draft: ArticleDraft;
   selectedAIModel: string;
+  selectedAIModelName?: string;
   onUpdateDraftPatch: (patch: Partial<ArticleDraft>) => void;
 }
 
-export default function WechatPreview({ draft, selectedAIModel, onUpdateDraftPatch }: WechatPreviewProps) {
+export default function WechatPreview({ draft, selectedAIModel, selectedAIModelName, onUpdateDraftPatch }: WechatPreviewProps) {
   const [copiedType, setCopiedType] = useState<"md" | "html" | null>(null);
   const [viralTitles, setViralTitles] = useState<ViralTitle[]>([]);
   const [generatingTitles, setGeneratingTitles] = useState(false);
@@ -347,7 +348,7 @@ export default function WechatPreview({ draft, selectedAIModel, onUpdateDraftPat
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
                 <span className="font-bold text-indigo-600">{draft.author || "公众号智笔阁"}</span>
                 <span>{draft.createdTime || "2026-05-22"}</span>
-                <span className="px-1.5 py-0.2 bg-[#F2F2F2] rounded select-none">AI：{selectedAIModel}</span>
+                <span className="px-1.5 py-0.2 bg-[#F2F2F2] rounded select-none">AI：{selectedAIModelName || selectedAIModel}</span>
               </div>
               <div className="mt-2 text-[11px] text-[#A0AEC0]">
                 模板风格：<span className="font-bold text-[#4A5568]" style={{ color: activeTemplate.primaryColor }}>{activeTemplate.name}</span>

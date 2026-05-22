@@ -5,11 +5,12 @@ import { apiFetch } from "../lib/api";
 
 interface NewsTrendingProps {
   selectedAIModel: string;
+  selectedAIModelName?: string;
   onSelectTopic: (angle: string, outline: string[]) => void;
   activeAngle: string;
 }
 
-export default function NewsTrending({ selectedAIModel, onSelectTopic, activeAngle }: NewsTrendingProps) {
+export default function NewsTrending({ selectedAIModel, selectedAIModelName, onSelectTopic, activeAngle }: NewsTrendingProps) {
   const [trends, setTrends] = useState<NewsItem[]>([]);
   const [loadingTrends, setLoadingTrends] = useState(false);
   const [topicInput, setTopicInput] = useState("");
@@ -220,7 +221,7 @@ export default function NewsTrending({ selectedAIModel, onSelectTopic, activeAng
             <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-2">
               <Loader2 className="w-8 h-8 text-violet-600 animate-spin" />
               <p className="text-xs">
-                正在使用 <span className="font-mono text-violet-600">{selectedAIModel}</span> 引擎为您深度构建爆款逻辑与目录大纲...
+                正在使用 <span className="font-mono text-violet-600">{selectedAIModelName || selectedAIModel}</span> 引擎为您深度构建爆款逻辑与目录大纲...
               </p>
             </div>
           ) : aiTopics.length > 0 ? (

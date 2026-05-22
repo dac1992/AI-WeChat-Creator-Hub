@@ -66,7 +66,7 @@ const DEFAULT_MODELS = [
   { id: "Claude-3.5", name: "Claude 3.5 Sonnet (经典文笔主笔)", provider: "Claude-3.5" },
   { id: "ChatGPT", name: "ChatGPT (GPT-4o 顶流通用)", provider: "ChatGPT" },
   { id: "DeepSeek-R1", name: "DeepSeek R1 (满血大模型推理)", provider: "DeepSeek" },
-  { id: "DeepSeek-V4", name: "DeepSeek V4 (极速并高内聚脱AI智写)", provider: "DeepSeek" },
+  { id: "DeepSeek-V3", name: "DeepSeek V3 (极速智写)", provider: "DeepSeek" },
   { id: "Kimi", name: "Kimi 智能主笔 (长素材吸纳)", provider: "Kimi" },
   { id: "Bailian", name: "通义千问 Max (国风古典叙事)", provider: "Bailian" },
   { id: "Volcengine", name: "火山引擎豆包 (Pro级亲切表达)", provider: "Volcengine" }
@@ -200,6 +200,9 @@ export default function App() {
     { id: "image", name: "5. 配图大师矩阵", desc: "封面插图高分辨率渲染" }
   ];
 
+  const currentModelObj = availableModels.find((m) => m.id === selectedAIModel);
+  const selectedAIModelName = currentModelObj ? currentModelObj.name : selectedAIModel;
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col antialiased">
       {/* Universal branding logo header bar */}
@@ -232,10 +235,26 @@ export default function App() {
             onChange={(e) => setSelectedAIModel(e.target.value)}
             className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-bold focus:outline-hidden cursor-pointer max-w-[220px] truncate"
           >
-            {availableModels.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
+            {Object.entries(
+              availableModels.reduce((acc, m) => {
+                let group = m.provider || "其他引擎";
+                if (group === "Claude-3.5") group = "Claude";
+                if (group === "Bailian") group = "通义千问";
+                if (group === "Volcengine") group = "火山豆包";
+                if (group === "Kimi") group = "Moonshot Kimi";
+                
+                if (!acc[group]) acc[group] = [];
+                acc[group].push(m);
+                return acc;
+              }, {} as Record<string, typeof availableModels>)
+            ).map(([group, models]: [string, any[]]) => (
+              <optgroup key={group} label={`${group} 引擎 (${models.length})`}>
+                {models.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
 
@@ -327,6 +346,7 @@ export default function App() {
             {activeTab === "topic" && (
               <NewsTrending
                 selectedAIModel={selectedAIModel}
+                selectedAIModelName={selectedAIModelName}
                 onSelectTopic={handleSelectTopicAngle}
                 activeAngle={currentDraft.topicAngle || ""}
               />
@@ -336,6 +356,7 @@ export default function App() {
               <ArticleEditor
                 draft={currentDraft}
                 selectedAIModel={selectedAIModel}
+                selectedAIModelName={selectedAIModelName}
                 onUpdateDraftPatch={updateDraftPatch}
                 onNavigateToPreview={() => setActiveTab("preview")}
               />
@@ -345,6 +366,7 @@ export default function App() {
               <WechatPreview
                 draft={currentDraft}
                 selectedAIModel={selectedAIModel}
+                selectedAIModelName={selectedAIModelName}
                 onUpdateDraftPatch={updateDraftPatch}
               />
             )}

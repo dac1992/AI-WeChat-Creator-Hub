@@ -50,22 +50,22 @@ async function callUniversalAIModel(params: {
   if (modelId.toLowerCase().includes("gemini")) {
     provider = "Gemini";
     apiKey = (reqHeaders["x-gemini-api-key"] as string) || "";
-  } else if (modelId === "Claude-3.5") {
+  } else if (modelId.toLowerCase().includes("claude") || modelId === "Claude-3.5") {
     provider = "Claude";
     apiKey = (reqHeaders["x-claude-api-key"] as string) || "";
-  } else if (modelId === "ChatGPT") {
+  } else if (modelId.toLowerCase().includes("gpt") || modelId.toLowerCase().includes("chatgpt") || modelId === "ChatGPT") {
     provider = "OpenAI";
     apiKey = (reqHeaders["x-openai-api-key"] as string) || "";
-  } else if (modelId.toLowerCase().includes("deepseek")) {
+  } else if (modelId.toLowerCase().includes("deepseek") && modelId !== "deepseek-r1" && modelId !== "deepseek-v3") {
     provider = "DeepSeek";
     apiKey = (reqHeaders["x-deepseek-api-key"] as string) || "";
-  } else if (modelId === "Kimi") {
+  } else if (modelId.toLowerCase().includes("moonshot") || modelId === "Kimi") {
     provider = "Kimi";
     apiKey = (reqHeaders["x-kimi-api-key"] as string) || "";
-  } else if (modelId === "Bailian") {
+  } else if (modelId.toLowerCase().includes("qwen") || modelId.toLowerCase().includes("llama") || modelId === "deepseek-r1" || modelId === "deepseek-v3" || modelId === "Bailian") {
     provider = "Bailian";
     apiKey = (reqHeaders["x-bailian-api-key"] as string) || "";
-  } else if (modelId === "Volcengine") {
+  } else if (modelId.toLowerCase().includes("doubao") || modelId === "Volcengine") {
     provider = "Volcengine";
     apiKey = (reqHeaders["x-volcengine-api-key"] as string) || "";
   }
@@ -93,7 +93,7 @@ async function callUniversalAIModel(params: {
 
   // 2. DeepSeek (Strictly complies with developers specification: https://api-docs.deepseek.com/zh-cn/)
   if (provider === "DeepSeek") {
-    const actualModel = modelId === "DeepSeek-R1" ? "deepseek-reasoner" : "deepseek-chat";
+    const actualModel = modelId === "DeepSeek-R1" ? "deepseek-reasoner" : (modelId === "DeepSeek-V3" || modelId === "DeepSeek-V4" ? "deepseek-chat" : modelId);
     const requestHeaders = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey.trim()}`
@@ -153,7 +153,7 @@ async function callUniversalAIModel(params: {
         "Authorization": `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: modelId === "ChatGPT" ? "gpt-4o" : modelId,
         messages: [
           { "role": "system", "content": systemInstruction },
           { "role": "user", "content": prompt }
@@ -185,7 +185,7 @@ async function callUniversalAIModel(params: {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-latest",
+        model: modelId === "Claude-3.5" ? "claude-3-5-sonnet-latest" : modelId,
         system: systemInstruction,
         messages: [
           { "role": "user", "content": prompt }
@@ -215,7 +215,7 @@ async function callUniversalAIModel(params: {
         "Authorization": `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify({
-        model: "moonshot-v1-8k",
+        model: modelId === "Kimi" ? "moonshot-v1-8k" : modelId,
         messages: [
           { "role": "system", "content": systemInstruction },
           { "role": "user", "content": prompt }
@@ -244,7 +244,7 @@ async function callUniversalAIModel(params: {
         "Authorization": `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify({
-        model: "qwen-max",
+        model: modelId === "Bailian" ? "qwen-max" : modelId,
         messages: [
           { "role": "system", "content": systemInstruction },
           { "role": "user", "content": prompt }
@@ -273,7 +273,7 @@ async function callUniversalAIModel(params: {
         "Authorization": `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify({
-        model: "doubao-pro-4k",
+        model: modelId === "Volcengine" ? "doubao-pro-4k" : modelId,
         messages: [
           { "role": "system", "content": systemInstruction },
           { "role": "user", "content": prompt }
@@ -556,7 +556,7 @@ app.post("/api/models/list", async (req, res) => {
     { id: "Claude-3.5", name: "Claude 3.5 Sonnet (经典文笔主笔)", provider: "Claude-3.5", desc: "遣词造句极具深度与情绪张力，适合抒情评论或纪实报道" },
     { id: "ChatGPT", name: "ChatGPT (GPT-4o 顶流通用)", provider: "ChatGPT", desc: "顶尖逻辑稳定性，能写出极佳的社交媒体爆款起伏" },
     { id: "DeepSeek-R1", name: "DeepSeek-R1 (满血推理之王)", provider: "DeepSeek", desc: "深度思考强化，极富深度与原创张力，完美脱离AI味" },
-    { id: "DeepSeek-V4", name: "DeepSeek-V4 (极速大语言模型)", provider: "DeepSeek", desc: "最新一代极速满血版，综合编排及响应速度极好" },
+    { id: "DeepSeek-V3", name: "DeepSeek-V3 (极速大语言模型)", provider: "DeepSeek", desc: "超低廉极智写作模型，综合编排及事实性极好" },
     { id: "Kimi", name: "Kimi 智能主笔 (月之暗面核心)", provider: "Kimi", desc: "适合一次性搜集长篇素材，主笔语气接地实用" },
     { id: "Bailian", name: "通义千问 Max (百炼旗舰大作)", provider: "Bailian", desc: "阿里明星引擎，成语典故极好，适合商业评论与中式叙事" },
     { id: "Volcengine", name: "火山引擎豆包 (Pro版智能)", provider: "Volcengine", desc: "字节精品引擎，词汇地道、富有烟火气、极易与群众共鸣" }
@@ -756,10 +756,11 @@ app.post("/api/models/list-by-provider", async (req, res) => {
           if (data.data && Array.isArray(data.data)) {
             const list = data.data.map((m: any) => {
               const cleanedId = m.id;
-              let dispName = cleanedId === "deepseek-chat" ? "DeepSeek V4 (极速大语言模型)" : "DeepSeek R1 (满血版官方推理)";
+              let dispName = cleanedId === "deepseek-chat" ? "DeepSeek V3 (极速智写)" : cleanedId === "deepseek-reasoner" ? "DeepSeek R1 (逻辑推理)" : cleanedId;
+              let finalName = dispName !== cleanedId ? `${dispName} (${cleanedId})` : cleanedId;
               return {
                 id: cleanedId,
-                name: `${dispName} (${cleanedId})`,
+                name: finalName,
                 provider: "DeepSeek",
                 desc: `DeepSeek 官方提供的在线机型。`
               };
@@ -774,7 +775,7 @@ app.post("/api/models/list-by-provider", async (req, res) => {
         success: true,
         models: [
           { id: "DeepSeek-R1", name: "DeepSeek R1 (满血版官方推理)", provider: "DeepSeek", desc: "深度强化推理思考，脱敏去AI味极其优异" },
-          { id: "DeepSeek-V4", name: "DeepSeek V4 (极速大语言模型)", provider: "DeepSeek", desc: "最新一代极速满血V4，综合编排与响应速度极好" }
+          { id: "DeepSeek-V3", name: "DeepSeek V3 (极速智写)", provider: "DeepSeek", desc: "极速满血V3，综合编排与事实性极好" }
         ]
       });
     }
@@ -822,13 +823,24 @@ app.post("/api/models/list-by-provider", async (req, res) => {
           const data: any = await resp.json();
           if (data.data && Array.isArray(data.data)) {
             const list = data.data
-              .filter((m: any) => m.id.includes("qwen") || m.id.includes("llama"))
-              .map((m: any) => ({
-                id: m.id,
-                name: `${m.id} (通义千问)`,
-                provider: "Bailian",
-                desc: "阿里云百炼大模型平台官方可用机型"
-              }));
+              .filter((m: any) => m.id.includes("qwen") || m.id.includes("llama") || m.id.includes("deepseek"))
+              .map((m: any) => {
+                let dispName = m.id;
+                if (m.id === "qwen-max" || m.id === "qwen-max-latest") dispName = "Qwen Max (百炼旗舰)";
+                else if (m.id === "qwen-plus" || m.id === "qwen-plus-latest") dispName = "Qwen Plus (百炼增强)";
+                else if (m.id === "qwen-turbo" || m.id === "qwen-turbo-latest") dispName = "Qwen Turbo (极速千问)";
+                else if (m.id === "qwen-long") dispName = "Qwen Long (超长文本)";
+                else if (m.id === "qwen-omni-turbo") dispName = "Qwen Omni Turbo (多模态极速)";
+                else if (m.id === "deepseek-r1") dispName = "DeepSeek R1 (通义百炼部署)";
+                else if (m.id === "deepseek-v3") dispName = "DeepSeek V3 (通义百炼极速)";
+                
+                return {
+                  id: m.id,
+                  name: dispName !== m.id ? `${dispName} (${m.id})` : `${m.id} (官方大模型)`,
+                  provider: "Bailian",
+                  desc: "阿里云百炼大模型平台官方可用机型"
+                };
+              });
             if (list.length > 0) {
               return res.json({ success: true, models: list });
             }
@@ -838,9 +850,9 @@ app.post("/api/models/list-by-provider", async (req, res) => {
       return res.json({
         success: true,
         models: [
-          { id: "qwen-max", name: "qwen-max (百炼通义千问旗舰)", provider: "Bailian", desc: "万亿参数超强逻辑，适合中国本土古典文化润色" },
-          { id: "qwen-plus", name: "qwen-plus (通义千问增强)", provider: "Bailian", desc: "极致性价比与多应用场景的平衡" },
-          { id: "qwen-turbo", name: "qwen-turbo (极速千问)", provider: "Bailian", desc: "一闪而至的响应时间" }
+          { id: "qwen-max", name: "Qwen Max (百炼通义千问旗舰)", provider: "Bailian", desc: "万亿参数超强逻辑，适合中国本土古典文化润色" },
+          { id: "qwen-plus", name: "Qwen Plus (通义千问增强)", provider: "Bailian", desc: "极致性价比与多应用场景的平衡" },
+          { id: "qwen-turbo", name: "Qwen Turbo (极速千问)", provider: "Bailian", desc: "一闪而至的响应时间" }
         ]
       });
     }

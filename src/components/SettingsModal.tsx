@@ -10,7 +10,7 @@ interface SettingsModalProps {
 const API_PROVIDERS = [
   {
     id: "Gemini",
-    name: "Google Gemini 核心引擎 (高度推荐)",
+    name: "Google Gemini 核心引擎",
     desc: "负责选题设计、公众号一键写稿、去AI味诊断、以及Imagen插画生成。极力推荐配置，完全解决频繁触发 429 quota 报错。",
     link: "https://aistudio.google.com/",
     placeholder: "AI Studio 免费或付费 Key (以 AIzaSy... 开头)",
@@ -19,7 +19,7 @@ const API_PROVIDERS = [
   },
   {
     id: "Claude-3.5",
-    name: "Anthropic Claude 3.5 Sonnet",
+    name: "Anthropic Claude 引擎",
     desc: "微信公众号深度长文主笔，遣词造句极富深度与修辞张力。",
     link: "https://console.anthropic.com/",
     placeholder: "sk-ant-... 格式的 API 密钥",
@@ -27,7 +27,7 @@ const API_PROVIDERS = [
   },
   {
     id: "ChatGPT",
-    name: "OpenAI GPT-4o 引擎",
+    name: "OpenAI GPT 核心引擎",
     desc: "常用于微信爆款起标题、热点解读，通用能力顶级。也是 DALL-E 3 画作生图的基础密钥。",
     link: "https://platform.openai.com/api-keys",
     placeholder: "sk-proj-... 格式的 API 密钥",
@@ -35,8 +35,8 @@ const API_PROVIDERS = [
   },
   {
     id: "DeepSeek",
-    name: "DeepSeek-V4 / R1 极速与推理引擎",
-    desc: "负责高硬度逻辑推理、干货拆解、知识图谱匹配，性价比之王（官方V4新版全面升级）。",
+    name: "DeepSeek 官方推理与极速引擎",
+    desc: "负责高硬度逻辑推理、干货拆解、知识图谱匹配，性价比之王。",
     link: "https://platform.deepseek.com/",
     placeholder: "sk-... 格式的 DeepSeek 官方密钥",
     iconColor: "text-indigo-600 bg-indigo-50",
@@ -83,8 +83,8 @@ const DEFAULT_MODELS = [
   { id: "gemini-2.0-flash-thinking-exp-01-21", name: "Gemini 2.0 Thinking (脑暴思考)", provider: "Gemini" },
   { id: "Claude-3.5", name: "Claude 3.5 Sonnet (经典文笔主笔)", provider: "Claude-3.5" },
   { id: "ChatGPT", name: "ChatGPT (GPT-4o 顶流通用)", provider: "ChatGPT" },
-  { id: "DeepSeek-R1", name: "DeepSeek R1 (满血大模型推理)", provider: "DeepSeek" },
-  { id: "DeepSeek-V4", name: "DeepSeek V4 (极速并高内聚脱AI智写)", provider: "DeepSeek" },
+  { id: "DeepSeek-R1", name: "DeepSeek R1 (逻辑推理)", provider: "DeepSeek" },
+  { id: "DeepSeek-V3", name: "DeepSeek V3 (极速智写)", provider: "DeepSeek" },
   { id: "Kimi", name: "Kimi 智能主笔 (长素材吸纳)", provider: "Kimi" },
   { id: "Bailian", name: "通义千问 Max (国风古典叙事)", provider: "Bailian" },
   { id: "Volcengine", name: "火山引擎豆包 (Pro级亲切表达)", provider: "Volcengine" }
@@ -96,16 +96,19 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [fetchingProvider, setFetchingProvider] = useState<string | null>(null);
   const [providerStatus, setProviderStatus] = useState<Record<string, string>>({});
+  const [availableModels, setAvailableModels] = useState<any[]>(DEFAULT_MODELS);
+  const [expandedProviders, setExpandedProviders] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (isOpen) {
       try {
-        const stored = localStorage.getItem("wechat_ai_api_keys");
-        if (stored) {
-          setKeys(JSON.parse(stored));
-        }
+        const storedKeys = localStorage.getItem("wechat_ai_api_keys");
+        if (storedKeys) setKeys(JSON.parse(storedKeys));
+        
+        const storedModelsText = localStorage.getItem("wechat_ai_latest_models");
+        if (storedModelsText) setAvailableModels(JSON.parse(storedModelsText));
       } catch (e) {
-        console.error("加载 API Keys 失败", e);
+        console.error("加载配置失败", e);
       }
     }
   }, [isOpen]);
@@ -168,6 +171,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
         
         // Save the updated merged models back to local storage
         localStorage.setItem("wechat_ai_latest_models", JSON.stringify(activeFullModels));
+        setAvailableModels(activeFullModels);
         
         // Instantly sync the currently edited keys value to localStorage so user doesn't lose it
         const nextKeys = { ...keys, [providerId]: keyVal };
@@ -255,6 +259,12 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
             {API_PROVIDERS.map((provider) => {
               const isValueVisible = showKeyId === provider.id;
               const value = keys[provider.id] || "";
+              
+              // Find dynamically loaded models for this specific provider
+              const providerModels = availableModels.filter(m => {
+                if (provider.id === "Claude-3.5" && m.provider === "Claude") return true;
+                return m.provider === provider.id;
+              });
 
               return (
                 <div 
@@ -265,7 +275,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
                 >
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${provider.iconColor}`}>
                           {provider.id}
                         </span>
@@ -278,7 +288,41 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-normal mt-1">
+
+                      {providerModels.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2 mt-1">
+                          {(() => {
+                            const isExpanded = expandedProviders[provider.id];
+                            const visibleModels = isExpanded ? providerModels : providerModels.slice(0, 5);
+                            const hasMore = providerModels.length > 5;
+                            
+                            return (
+                              <>
+                                {visibleModels.map(m => (
+                                  <span key={m.id} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-mono border border-slate-200" title={m.name}>
+                                    {m.name.length > 28 ? m.name.substring(0,25) + "..." : m.name}
+                                  </span>
+                                ))}
+                                {hasMore && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setExpandedProviders(p => ({ ...p, [provider.id]: !isExpanded }));
+                                    }}
+                                    className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-bold border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer"
+                                  >
+                                    {isExpanded ? "收起" : `展开全部 ${providerModels.length} 项`}
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      <p className="text-[11px] text-slate-400 leading-normal">
                         {provider.desc}
                       </p>
                     </div>
