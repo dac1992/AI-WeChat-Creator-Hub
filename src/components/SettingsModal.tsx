@@ -153,6 +153,16 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
         body: JSON.stringify({ provider: providerId })
       });
 
+      if (!resp.ok) {
+        const text = await resp.text();
+        let errorMsg = text;
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed.error) errorMsg = parsed.error;
+        } catch (e) {}
+        throw new Error(`请求失败 (${resp.status}): ${errorMsg}`);
+      }
+
       const data = await resp.json();
       if (data.success && Array.isArray(data.models)) {
         // Retrieve current active full list from localStorage, default to DEFAULT_MODELS if empty

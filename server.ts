@@ -10,6 +10,10 @@ app.use(express.json());
 
 const PORT = 3000;
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", message: "Server is running on Vercel" });
+});
+
 // Helper to retrieve Gemini API Client ONLY if a user-supplied custom key is provided.
 // No fallback to process.env.GEMINI_API_KEY is allowed.
 function getAiClient(customKey?: string): GoogleGenAI | null {
