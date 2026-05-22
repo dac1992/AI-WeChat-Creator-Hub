@@ -574,6 +574,10 @@ app.post("/api/models/list", async (req, res) => {
       fetchedArray = (modelsResponse as any).models;
     } else if (modelsResponse && typeof (modelsResponse as any)[Symbol.iterator] === 'function') {
       fetchedArray = Array.from(modelsResponse as any);
+    } else if (modelsResponse && typeof (modelsResponse as any)[Symbol.asyncIterator] === 'function') {
+      for await (const m of (modelsResponse as any)) {
+        fetchedArray.push(m);
+      }
     }
 
     if (fetchedArray && fetchedArray.length > 0) {
@@ -647,6 +651,10 @@ app.post("/api/models/list-by-provider", async (req, res) => {
         fetchedArray = (modelsResponse as any).models;
       } else if (modelsResponse && typeof (modelsResponse as any)[Symbol.iterator] === 'function') {
         fetchedArray = Array.from(modelsResponse as any);
+      } else if (modelsResponse && typeof (modelsResponse as any)[Symbol.asyncIterator] === 'function') {
+        for await (const m of (modelsResponse as any)) {
+          fetchedArray.push(m);
+        }
       }
 
       const geminiFetchedList = fetchedArray
@@ -1045,7 +1053,9 @@ export default app;
 // Start express static listener only if not running in Vercel Serverless environment
 async function startServer() {
   if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
-    const { createServer: createViteServer } = await import("vite");
+    // Use string concatenation to hide the import from static analyzers (esbuild / Vercel)
+    const vitePkg = "vite";
+    const { createServer: createViteServer } = await import(vitePkg);
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
