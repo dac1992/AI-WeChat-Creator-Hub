@@ -27,9 +27,20 @@ export const DEFAULT_PRESET_SOURCES: NewsSource[] = [
   { id: 's10', name: '钛媒体', url: 'tmtpost.com' },
   { id: 's11', name: '财新网', url: 'caixin.com' },
   { id: 's12', name: '小红书', url: 'xiaohongshu.com' },
+  { id: 's_tophub', name: '今日热榜', url: 'tophub.today' }
 ];
 
 export const DEFAULT_GROUPS: NewsGroup[] = [
+  {
+    id: 'g0',
+    name: '天聚数行全网热榜',
+    sources: [{ id: 's_tian', name: '天聚数行综合聚合', url: 'tianapi.com' }]
+  },
+  {
+    id: 'g_tophub',
+    name: '今日热榜节点',
+    sources: [{ id: 's_tophub', name: '今日热榜综合导航', url: 'tophub.today' }]
+  },
   {
     id: 'g1',
     name: '科技互联网',

@@ -307,23 +307,74 @@ async function callUniversalAIModel(params: {
 app.post("/api/news/trending", async (req, res) => {
   try {
     const { category, sources, selectedAIModel = "gemini-3.5-flash" } = req.body;
+
+    if (category === "今日热榜节点") {
+      return res.json({
+        success: true,
+        data: [{
+          title: "点此前往【今日热榜】浏览全网最新热搜 ↗",
+          hotVal: "聚合",
+          source: "今日热榜 (TopHub)",
+          sourceUrl: "https://tophub.today/",
+          summary: "今日热榜聚合了微信、微博、知乎、百度、知乎日报、少数派等各大平台的最新热点榜单，覆盖科技、娱乐、社区等各领域。",
+          category: "外站链接"
+        }],
+        isMock: false
+      });
+    }
+
+    if (category === "天聚数行全网热榜") {
+      let tianApiKey = req.headers["x-tianapi-key"] as string | undefined;
+      // Use built-in key if not provided by user
+      if (!tianApiKey || tianApiKey.trim() === "") {
+        tianApiKey = "905b06e210f8ebce63d4822532d6fbfe";
+      }
+
+      try {
+        const response = await fetch(`https://apis.tianapi.com/networkhot/index?key=${tianApiKey.trim()}`);
+        if (!response.ok) throw new Error(`天行数据接口错误: HTTP ${response.status}`);
+        
+        const data: any = await response.json();
+        if (data.code === 200 && data.result && Array.isArray(data.result.list)) {
+          const mapped = data.result.list.slice(0, 10).map((item: any) => ({
+            title: item.title || "未知热点",
+            hotVal: item.hotnum ? (item.hotnum > 10000 ? (item.hotnum/10000).toFixed(1) + "万" : item.hotnum) + " 热度" : "爆款热搜",
+            source: "天聚数行(全网热榜)",
+            sourceUrl: "https://s.weibo.com/weibo?q=" + encodeURIComponent(item.title || ""),
+            summary: item.digest || item.title || "",
+            category: "实时趋势"
+          }));
+          return res.json({ success: true, data: mapped, isMock: false });
+        } else if (data.code === 150) {
+           return res.status(400).json({ error: "天聚数行今日免费次数已用完，请稍后再试或配置您自己的API Key。" });
+        } else {
+          console.warn("TianAPI error:", data.msg);
+          throw new Error(data.msg || "天聚数行请求失败");
+        }
+      } catch(e: any) {
+        console.error("TianAPI Fetch Error:", e);
+        return res.status(400).json({ error: `天聚数行获取失败: ${e.message}` });
+      }
+    }
+
     let sourceQuery = "";
     if (sources && Array.isArray(sources) && sources.length > 0) {
       const sourceNames = sources.map((s: any) => s.name).join(", ");
       sourceQuery = `请重点从以下新闻来源（${sourceNames}）中搜索获取最新热点。`;
     }
 
-    const systemPrompt = `你是一个强大的全网新闻实时热点发现雷达。`;
-    const prompt = `列出当前最新、最热的6个社交媒体爆款趋势话题。${sourceQuery}
-需要涵盖科技前沿、大厂动向、财经创见或现代生活，且与用户选择的类别（${category || '全部'}）强相关。
-请注意：如果指定了来源，请尽力从指定的来源搜索。如果部分指定来源没有最新的突发新闻，可以用其他权威来源的热点作为补充，保证有6条结果。
+    const systemPrompt = `你是一个强大的全网新闻实时热点发现雷达。任务是使用搜索引擎获取过去24小时内的真实热点，绝对禁止捏造过时的虚假新闻。`;
+    const prompt = `列出当前（最好是今天，即过去24小时内）最新、最热的6个社交媒体爆款趋势话题。${sourceQuery}
+需要涵盖前沿动向、社会热点或现代生活，且与用户选择的类别（${category || '全部'}）强相关。
+请注意：如果指定了来源，请先从指定的来源搜索。如果部分指定来源没有最新的突发新闻，可以用其他权威来源的热点补充，保证有6条结果。
+【重要防404警告】由于大模型容易捏造不存在的文章链接导致404，sourceUrl 请绝对不要伪造新闻的详情页深链接！请统一使用该话题在搜索引擎或平台的搜索链接。例如：https://s.weibo.com/weibo?q=话题 或 https://www.baidu.com/s?wd=话题。
 请严格采用纯JSON数组格式返回，不要写 markdown 标记，不要解释。格式结构如下：
 [
   {
     "title": "爆款标题/话题事件",
     "hotVal": "热度指数，例如 9.8万",
     "source": "来源，如微博、快科技、澎湃、36氪",
-    "sourceUrl": "该条热点新闻的真实网页链接(请使用真实URL)",
+    "sourceUrl": "对应的安全搜索链接，绝对不要出现404链接",
     "summary": "一到两句话深度对事件背景和传播核心槽点进行总结",
     "category": "分类标签，如“科技”、“商业”、“情感”、“社会”"
   }

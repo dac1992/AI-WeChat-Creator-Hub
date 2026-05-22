@@ -168,15 +168,20 @@ export default function App() {
     try {
       const stored = localStorage.getItem("wechat_ai_drafts");
       let list: ArticleDraft[] = stored ? JSON.parse(stored) : [];
-      const idx = list.findIndex(d => d.id === currentDraft.id);
-      const nextItem = { ...currentDraft, lastUpdated: new Date().toLocaleTimeString() };
-      if (idx !== -1) {
-        list[idx] = nextItem;
-      } else {
-        list.unshift(nextItem);
-      }
+      
+      // Auto-save handles updating the active record.
+      // This manual save button explicitly creates a new snapshot/version.
+      const newId = "draft_" + Date.now();
+      const nextItem = { 
+        ...currentDraft, 
+        id: newId,
+        title: currentDraft.title ? currentDraft.title + " (版本存档)" : "版本存档",
+        lastUpdated: new Date().toLocaleTimeString() 
+      };
+      
+      list.unshift(nextItem);
       localStorage.setItem("wechat_ai_drafts", JSON.stringify(list));
-      localStorage.setItem("wechat_active_draft_id", currentDraft.id);
+      localStorage.setItem("wechat_active_draft_id", newId);
       setCurrentDraft(nextItem);
     } catch (err) {
       console.error(err);

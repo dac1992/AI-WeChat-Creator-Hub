@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArticleDraft } from "../types";
-import { FolderHeart, Plus, Save, Trash2, Calendar, FileText, Check } from "lucide-react";
+import { FolderHeart, Plus, Save, Trash2, Calendar, FileText, Check, Database, AlertTriangle } from "lucide-react";
 
 interface DraftsDrawerProps {
   currentDraft: ArticleDraft;
@@ -11,10 +11,33 @@ interface DraftsDrawerProps {
 export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent }: DraftsDrawerProps) {
   const [draftsList, setDraftsList] = useState<ArticleDraft[]>([]);
   const [saveNotify, setSaveNotify] = useState(false);
+  const [storageSize, setStorageSize] = useState<string>("0 KB");
 
   useEffect(() => {
     loadAllDrafts();
+    calculateStorageSize();
   }, [currentDraft]);
+
+  const calculateStorageSize = () => {
+    try {
+      let lsTotal = 0;
+      for (let x in localStorage) {
+        if (!localStorage.hasOwnProperty(x)) continue;
+        // String length * 2 bytes per char
+        lsTotal += (localStorage[x].length + x.length) * 2;
+      }
+      
+      if (lsTotal < 1024) {
+        setStorageSize(lsTotal + " B");
+      } else if (lsTotal < 1024 * 1024) {
+        setStorageSize((lsTotal / 1024).toFixed(2) + " KB");
+      } else {
+        setStorageSize((lsTotal / (1024 * 1024)).toFixed(2) + " MB");
+      }
+    } catch(e) {
+      setStorageSize("未知");
+    }
+  };
 
   const loadAllDrafts = () => {
     try {
@@ -35,12 +58,47 @@ export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent 
     setTimeout(() => {
       setSaveNotify(false);
       loadAllDrafts();
+      calculateStorageSize();
     }, 1200);
+  };
+
+  const handleClearAllStorage = () => {
+    if (!confirm("⚠️ 危险操作！\n这将清空所有的存盘草稿、已绑定的媒体源配置以及存储的全部缓存记录。此操作不可恢复！是否确认清空？")) return;
+    try {
+      const keysToKeep = ["wechat_ai_api_key_gemini"]; // if there's anything to keep, maybe API keys? But actually, the prompt implies "定期清除".
+      // Let's just remove drafts to be safe, or just clear all localstorage
+      localStorage.removeItem("wechat_ai_drafts");
+      localStorage.removeItem("wechat_active_draft_id");
+      localStorage.removeItem("wechat_news_groups");
+      localStorage.removeItem("wechat_news_all_sources");
+      
+      const newEmptyDraft: ArticleDraft = {
+        id: "draft_" + Date.now(),
+        title: "未命名自媒体新稿",
+        content: "",
+        author: "公众号",
+        createdTime: new Date().toISOString().split("T")[0],
+        lastUpdated: new Date().toLocaleTimeString(),
+        selectedTemplateId: "classic-green",
+        model: "Gemini",
+        imageModel: "gpt-image",
+        style: "专业",
+        wordCount: "1500",
+        ctaText: ""
+      };
+      
+      onLoadDraft(newEmptyDraft);
+      setDraftsList([]);
+      calculateStorageSize();
+      alert("本地数据已成功清空！");
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   const handleDeleteDraft = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("确定要删除这篇草稿吗？此操作不可逆。")) return;
+    if (!confirm("确定要删除这篇历史存档吗？此操作不可逆。")) return;
     try {
       const stored = localStorage.getItem("wechat_ai_drafts");
       if (stored) {
@@ -48,6 +106,7 @@ export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent 
         const filtered = list.filter(d => d.id !== id);
         localStorage.setItem("wechat_ai_drafts", JSON.stringify(filtered));
         loadAllDrafts();
+        calculateStorageSize();
       }
     } catch (err) {
       console.error(err);
@@ -102,11 +161,11 @@ export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent 
           >
             {saveNotify ? (
               <>
-                <Check className="w-3.5 h-3.5" /> 已存
+                <Check className="w-3.5 h-3.5" /> 已发存档
               </>
             ) : (
               <>
-                <Save className="w-3.5 h-3.5" /> 保存草稿
+                <Save className="w-3.5 h-3.5" /> 存为新版本
               </>
             )}
           </button>
@@ -133,9 +192,9 @@ export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent 
                   }`}
                 >
                   <div className="flex items-start gap-1.5 min-w-0 flex-1">
-                    <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <FileText className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${worksOnCurrent ? 'text-rose-500' : 'text-slate-400'}`} />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-slate-800 truncate leading-snug">
+                      <p className={`text-[11px] font-semibold truncate leading-snug ${worksOnCurrent ? 'text-rose-700' : 'text-slate-800'}`}>
                         {item.title}
                       </p>
                       <span className="text-[9px] text-[#A0AEC0] flex items-center gap-1">
@@ -160,6 +219,20 @@ export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent 
             </div>
           )}
         </div>
+      </div>
+
+      {/* Local Storage Indicator */}
+      <div className="border-t border-slate-100 pt-3 mt-2 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
+          <Database className="w-3 h-3 text-slate-400" />
+          <span>本地数据占用: <span className="font-bold text-slate-500">{storageSize}</span></span>
+        </div>
+        <button
+          onClick={handleClearAllStorage}
+          className="text-[10px] font-bold text-slate-400 hover:text-rose-600 transition-colors flex items-center gap-1"
+        >
+          <AlertTriangle className="w-3 h-3" /> 清理缓存
+        </button>
       </div>
     </div>
   );

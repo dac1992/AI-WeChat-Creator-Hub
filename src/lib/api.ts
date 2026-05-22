@@ -26,6 +26,9 @@ export async function apiFetch(url: string, init?: RequestInit): Promise<Respons
     const stored = localStorage.getItem("wechat_ai_api_keys");
     if (stored) {
       const parsed = JSON.parse(stored);
+      if (parsed.TianAPI && parsed.TianAPI.trim() !== "") {
+        headers["x-tianapi-key"] = parsed.TianAPI.trim();
+      }
       if (parsed.Gemini && parsed.Gemini.trim() !== "") {
         headers["x-gemini-api-key"] = parsed.Gemini.trim();
       }

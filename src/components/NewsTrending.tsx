@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NewsItem, TopicAngle, ArticleDraft } from "../types";
-import { Sparkles, TrendingUp, RefreshCw, Send, CheckCircle, HelpCircle, Loader2, Settings2 } from "lucide-react";
+import { Sparkles, TrendingUp, RefreshCw, Send, CheckCircle, HelpCircle, Loader2, Settings2, ExternalLink } from "lucide-react";
 import { apiFetch } from "../lib/api";
 import SourceManagerModal, { NewsGroup, DEFAULT_GROUPS } from "./SourceManagerModal";
 
@@ -36,6 +36,23 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
         const parsed = JSON.parse(savedGroupsStr);
         if (parsed && Array.isArray(parsed) && parsed.length > 0) {
           loadedGroups = parsed;
+          
+          let modified = false;
+          const newGroups = [...loadedGroups];
+          
+          // Ensure special groups exist and are at the top
+          const mustHaveGroups = DEFAULT_GROUPS.filter(g => g.id === "g0" || g.id === "g_tophub");
+          for (let i = mustHaveGroups.length - 1; i >= 0; i--) {
+            if (!newGroups.find(g => g.id === mustHaveGroups[i].id)) {
+              newGroups.unshift(mustHaveGroups[i]);
+              modified = true;
+            }
+          }
+          
+          if (modified) {
+            loadedGroups = newGroups;
+            localStorage.setItem("wechat_news_groups", JSON.stringify(loadedGroups));
+          }
         }
       } catch (e) {}
     }
@@ -229,47 +246,52 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
           ) : loadingTrends ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
               <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
-              <p className="text-xs">正在实时访问 X、微博和新闻门户抓取热度数据...</p>
+              <p className="text-xs">正在实时访问媒体平台及新闻门户获取热度数据...</p>
             </div>
           ) : trends.length > 0 ? (
             trends.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-lg border border-slate-100 hover:border-rose-100 hover:bg-rose-50/25 transition-all group relative cursor-pointer"
+                className="p-2.5 rounded-lg border border-slate-100 hover:border-rose-100 hover:bg-rose-50/50 transition-all group relative cursor-pointer"
                 onClick={() => handleUseTrendAsTopic(item.title)}
               >
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/10 text-rose-600">
-                    TOP {idx + 1}
-                  </span>
-                  <span className="text-[12px] font-mono text-slate-500 flex items-center gap-1">
+                <div className="flex items-center justify-between mb-1 text-left">
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0 pr-2">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-[4px] text-[9px] font-black bg-rose-500 text-white shrink-0 shadow-xs">
+                      {idx + 1}
+                    </span>
+                    <h4 className="font-bold text-slate-800 text-[12px] group-hover:text-rose-600 truncate transition-all" title={item.title}>
+                      {item.title}
+                    </h4>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 font-semibold shrink-0">
                     👥 {item.hotVal}
                   </span>
                 </div>
-                <h4 className="font-medium text-slate-800 text-[13px] group-hover:text-rose-600 line-clamp-2 transition-all">
-                  {item.title}
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
-                  {item.summary}
-                </p>
-                <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+                {item.summary && item.summary !== item.title && (
+                  <p className="text-[10px] text-slate-500 line-clamp-1 leading-snug text-left mb-1.5 ml-5.5">
+                    {item.summary}
+                  </p>
+                )}
+                <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 pt-1.5 border-t border-slate-50">
                   <div className="flex items-center gap-1">
-                    <span>来自：{item.source}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 font-medium">来自: {item.source}</span>
                     {item.sourceUrl && (
                       <a 
                         href={item.sourceUrl.startsWith('http') ? item.sourceUrl : `https://${item.sourceUrl}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-700 p-0.5 ml-1 rounded hover:bg-blue-50 transition-colors"
+                        className="text-blue-500 hover:text-blue-700 p-0.5 ml-0.5 rounded hover:bg-blue-50 transition-colors flex items-center gap-0.5 font-medium"
                         onClick={(e) => e.stopPropagation()}
                         title="访问原文"
                       >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                        访问
                       </a>
                     )}
                   </div>
-                  <span className="px-1.5 py-0.2 bg-slate-100 rounded group-hover:bg-rose-100 group-hover:text-rose-600 transition-all">
-                    一键选题 →
+                  <span className="text-[9px] font-bold text-slate-400 group-hover:text-rose-500 transition-colors flex items-center gap-0.5">
+                    <Send className="w-2.5 h-2.5" /> 一键选用
                   </span>
                 </div>
               </div>

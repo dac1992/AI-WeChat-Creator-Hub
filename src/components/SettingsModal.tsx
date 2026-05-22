@@ -373,7 +373,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
                   </div>
 
                   {/* Provider dynamic model list loader */}
-                  {provider.id !== "Stability" && (
+                  {provider.id !== "Stability" && provider.id !== "TianAPI" && (
                     <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-slate-100 pt-3">
                       <span className="text-[10px] text-slate-400">
                         使用该 Key 连通其大模型网关刷新可用型号列表
