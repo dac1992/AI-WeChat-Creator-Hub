@@ -76,27 +76,13 @@ const API_PROVIDERS = [
   }
 ];
 
-const DEFAULT_MODELS = [
-  { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash (全新主推 - 默认)", provider: "Gemini" },
-  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro (深度长文旗舰)", provider: "Gemini" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash (秒级智能写稿)", provider: "Gemini" },
-  { id: "gemini-2.0-flash-thinking-exp-01-21", name: "Gemini 2.0 Thinking (脑暴思考)", provider: "Gemini" },
-  { id: "Claude-3.5", name: "Claude 3.5 Sonnet (经典文笔主笔)", provider: "Claude-3.5" },
-  { id: "ChatGPT", name: "ChatGPT (GPT-4o 顶流通用)", provider: "ChatGPT" },
-  { id: "DeepSeek-R1", name: "DeepSeek R1 (逻辑推理)", provider: "DeepSeek" },
-  { id: "DeepSeek-V3", name: "DeepSeek V3 (极速智写)", provider: "DeepSeek" },
-  { id: "Kimi", name: "Kimi 智能主笔 (长素材吸纳)", provider: "Kimi" },
-  { id: "Bailian", name: "通义千问 Max (国风古典叙事)", provider: "Bailian" },
-  { id: "Volcengine", name: "火山引擎豆包 (Pro级亲切表达)", provider: "Volcengine" }
-];
-
 export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: SettingsModalProps) {
   const [keys, setKeys] = useState<Record<string, string>>({});
   const [showKeyId, setShowKeyId] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [fetchingProvider, setFetchingProvider] = useState<string | null>(null);
   const [providerStatus, setProviderStatus] = useState<Record<string, string>>({});
-  const [availableModels, setAvailableModels] = useState<any[]>(DEFAULT_MODELS);
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [expandedProviders, setExpandedProviders] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -106,7 +92,17 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
         if (storedKeys) setKeys(JSON.parse(storedKeys));
         
         const storedModelsText = localStorage.getItem("wechat_ai_latest_models");
-        if (storedModelsText) setAvailableModels(JSON.parse(storedModelsText));
+        if (storedModelsText) {
+          const parsedStrKeys = localStorage.getItem("wechat_ai_api_keys");
+          const curKeys = parsedStrKeys ? JSON.parse(parsedStrKeys) : {};
+          const mdls = JSON.parse(storedModelsText);
+          const filteredMdls = mdls.filter((m: any) => {
+            let p = m.provider;
+            if (p === "Claude-3.5") p = "Claude";
+            return curKeys[p] && curKeys[p].trim() !== "";
+          });
+          setAvailableModels(filteredMdls);
+        }
       } catch (e) {
         console.error("加载配置失败", e);
       }
@@ -161,7 +157,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
       if (data.success && Array.isArray(data.models)) {
         // Retrieve current active full list from localStorage, default to DEFAULT_MODELS if empty
         const storedModelsText = localStorage.getItem("wechat_ai_latest_models");
-        let activeFullModels = storedModelsText ? JSON.parse(storedModelsText) : [...DEFAULT_MODELS];
+        let activeFullModels = storedModelsText ? JSON.parse(storedModelsText) : [];
         
         // Remove old models of this specific provider from the list
         activeFullModels = activeFullModels.filter((m: any) => m.provider !== providerId && m.provider !== (providerId === "Claude-3.5" ? "Claude" : providerId));

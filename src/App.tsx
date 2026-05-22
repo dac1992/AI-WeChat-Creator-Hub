@@ -58,38 +58,44 @@ const INITIAL_DRAFT_SEED: ArticleDraft = {
 
 type StepId = "topic" | "write" | "preview" | "review" | "image";
 
-const DEFAULT_MODELS = [
-  { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash (全新主推 - 默认)", provider: "Gemini" },
-  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro (深度长文旗舰)", provider: "Gemini" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash (秒级智能写稿)", provider: "Gemini" },
-  { id: "gemini-2.0-flash-thinking-exp-01-21", name: "Gemini 2.0 Thinking (脑暴思考)", provider: "Gemini" },
-  { id: "Claude-3.5", name: "Claude 3.5 Sonnet (经典文笔主笔)", provider: "Claude-3.5" },
-  { id: "ChatGPT", name: "ChatGPT (GPT-4o 顶流通用)", provider: "ChatGPT" },
-  { id: "DeepSeek-R1", name: "DeepSeek R1 (满血大模型推理)", provider: "DeepSeek" },
-  { id: "DeepSeek-V3", name: "DeepSeek V3 (极速智写)", provider: "DeepSeek" },
-  { id: "Kimi", name: "Kimi 智能主笔 (长素材吸纳)", provider: "Kimi" },
-  { id: "Bailian", name: "通义千问 Max (国风古典叙事)", provider: "Bailian" },
-  { id: "Volcengine", name: "火山引擎豆包 (Pro级亲切表达)", provider: "Volcengine" }
-];
-
 export default function App() {
-  const [selectedAIModel, setSelectedAIModel] = useState("gemini-3.5-flash");
+  const [selectedAIModel, setSelectedAIModel] = useState("");
   const [activeTab, setActiveTab] = useState<StepId>("topic");
   const [currentDraft, setCurrentDraft] = useState<ArticleDraft>(INITIAL_DRAFT_SEED);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [availableModels, setAvailableModels] = useState<any[]>(DEFAULT_MODELS);
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
 
   // Load latest dynamically retrieved models if any
   const loadAvailableModels = () => {
     try {
       const stored = localStorage.getItem("wechat_ai_latest_models");
+      const storedKeysStr = localStorage.getItem("wechat_ai_api_keys");
+      const storedKeys = storedKeysStr ? JSON.parse(storedKeysStr) : {};
+
       if (stored) {
-        setAvailableModels(JSON.parse(stored));
+        let parsed = JSON.parse(stored);
+        
+        // Filter out default mock models that might be left over from old cache
+        // And ensure we only show models for providers where a key exists
+        const filtered = parsed.filter((m: any) => {
+          let p = m.provider;
+          if (p === "Claude-3.5") p = "Claude";
+          return storedKeys[p] && storedKeys[p].trim() !== "";
+        });
+
+        setAvailableModels(filtered);
+        if (filtered.length > 0) {
+          if (!selectedAIModel || !filtered.some((m: any) => m.id === selectedAIModel)) {
+            setSelectedAIModel(filtered[0].id);
+          }
+        } else {
+          setSelectedAIModel("");
+        }
       } else {
-        setAvailableModels(DEFAULT_MODELS);
+        setAvailableModels([]);
       }
     } catch (e) {
-      setAvailableModels(DEFAULT_MODELS);
+      setAvailableModels([]);
     }
   };
 
@@ -218,6 +224,9 @@ export default function App() {
             onChange={(e) => setSelectedAIModel(e.target.value)}
             className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-bold focus:outline-hidden cursor-pointer max-w-[220px] truncate"
           >
+            {availableModels.length === 0 && (
+              <option value="" disabled>请先配置 API Key 拉取模型</option>
+            )}
             {Object.entries(
               availableModels.reduce((acc, m) => {
                 let group = m.provider || "其他引擎";
