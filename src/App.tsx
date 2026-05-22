@@ -77,7 +77,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<StepId>("topic");
   const [currentDraft, setCurrentDraft] = useState<ArticleDraft>(INITIAL_DRAFT_SEED);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [hasCustomKey, setHasCustomKey] = useState(false);
   const [availableModels, setAvailableModels] = useState<any[]>(DEFAULT_MODELS);
 
   // Load latest dynamically retrieved models if any
@@ -94,23 +93,7 @@ export default function App() {
     }
   };
 
-  // Check if user has any custom keys configured on mount / updates
-  const checkCustomKeys = () => {
-    try {
-      const stored = localStorage.getItem("wechat_ai_api_keys");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.Gemini && parsed.Gemini.trim() !== "") {
-          setHasCustomKey(true);
-          return;
-        }
-      }
-    } catch (e) {}
-    setHasCustomKey(false);
-  };
-
   useEffect(() => {
-    checkCustomKeys();
     loadAvailableModels();
   }, []);
 
@@ -258,19 +241,7 @@ export default function App() {
             ))}
           </select>
 
-          {/* Key Status Indicator */}
-          <div 
-            onClick={() => setIsSettingsOpen(true)}
-            className={`cursor-pointer px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all border select-none ${
-              hasCustomKey 
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" 
-                : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 animate-pulse"
-            }`}
-            title={hasCustomKey ? "已成功装载且生效您本人的专属 Gemini 密钥，安全极速无频限制！" : "当前处于系统公共限量测试配置下，多并发极易频控。轻触此处立即配置您专属的免费 API Key，彻底消除超时风险！"}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${hasCustomKey ? "bg-emerald-500" : "bg-amber-500"}`} />
-            <span>{hasCustomKey ? "专属 API 已装载" : "共享配额重负载(轻触配置)"}</span>
-          </div>
+
 
           <button
             onClick={() => setIsSettingsOpen(true)}
@@ -402,7 +373,6 @@ export default function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onKeysUpdated={() => {
-          checkCustomKeys();
           loadAvailableModels();
         }}
       />

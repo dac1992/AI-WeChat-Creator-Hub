@@ -236,17 +236,14 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* Quick Guidance Alert Box */}
-          <div className="p-4 bg-rose-50/70 border border-rose-200/80 rounded-xl text-xs text-rose-950 leading-relaxed text-left flex gap-3">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-xl text-xs text-blue-950 leading-relaxed text-left flex gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold flex items-center gap-1.5 text-rose-800 mb-1">
-                <Sparkles className="w-3.5 h-3.5 text-rose-500 animate-pulse" /> 自媒体私有 API 密钥安全隔离模式
-              </p>
-              <p className="mb-2">
-                <strong>【重要声明】</strong> 本系统已根据最新要求，高度契合用户的开发需求，<strong>完全屏蔽并删除了所有服务器预设的公共共享大模型与免 Key 生成机制</strong>，确保每个用户的密钥都是高内聚且绝对安全的本地沙盒隐私。
+              <p className="font-bold flex items-center gap-1.5 text-blue-800 mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-blue-500 animate-pulse" /> 多模型动态拉取与配置引擎
               </p>
               <p className="font-bold text-slate-800">
-                🚨 请注意：本系统完美支持【各平台独立拉取最新模型】！填入对应厂商的 API Key 并点击其卡片底部的 <strong>拉取最新可用模型</strong> 按钮，系统将立即连接其真实网关拉取最新模型选项！
+                🚨 请注意：本系统完美支持【各平台独立拉取最新模型】！填入对应厂商的 API Key 并点击其卡片底部的 <strong>拉取最新可用模型</strong> 按钮，系统将立即连接其真实网关拉取最新模型选项！配置完成后点击下方的“保存并在本地应用”以生效。
               </p>
             </div>
           </div>
