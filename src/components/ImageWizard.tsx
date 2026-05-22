@@ -20,7 +20,9 @@ const IMAGE_MODELS_POOL = [
 export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPreview }: ImageWizardProps) {
   const [selectedModel, setSelectedModel] = useState("gemini-imagen");
   const [aspectRatio, setAspectRatio] = useState("16:9"); // Default to WeChat Hero Banner aspect ratio
-  const [imagePrompt, setImagePrompt] = useState("");
+  
+  const imagePrompt = draft.imagePrompt || "";
+  
   const [generating, setGenerating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState<string>("");
   const [isSuccessMsg, setIsSuccessMsg] = useState("");
@@ -107,7 +109,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
       `Classical Chinese wash painting modern flat crossover art, conveying the essence of "${title}", zen-like atmosphere, high contrast, elegant colors`
     ];
     const pick = words[Math.floor(Math.random() * words.length)];
-    setImagePrompt(pick);
+    onUpdateDraftPatch({ imagePrompt: pick });
   };
 
   const handleGenerateImage = async () => {
@@ -297,7 +299,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
             </div>
             <textarea
               value={imagePrompt}
-              onChange={(e) => setImagePrompt(e.target.value)}
+              onChange={(e) => onUpdateDraftPatch({ imagePrompt: e.target.value })}
               placeholder="例如：微信公众号扁平插画风格，一个坐在电脑前喝咖啡露出微笑的极简线条程序员画像，渐变背景"
               className="w-full h-[75px] p-2 bg-slate-500/5 border border-slate-300 rounded-lg text-xs text-slate-700 placeholder-slate-400"
             />

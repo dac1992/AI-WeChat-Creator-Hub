@@ -7,6 +7,7 @@ import ReviewIntelligence from "./components/ReviewIntelligence";
 import ImageWizard from "./components/ImageWizard";
 import DraftsDrawer from "./components/DraftsDrawer";
 import SettingsModal from "./components/SettingsModal";
+import ModelSelector from "./components/ModelSelector";
 import { Sparkles, Cpu, BookOpen, Layers, CheckCircle2, ChevronRight, HelpCircle, Settings } from "lucide-react";
 
 const INITIAL_DRAFT_SEED: ArticleDraft = {
@@ -59,7 +60,16 @@ const INITIAL_DRAFT_SEED: ArticleDraft = {
 type StepId = "topic" | "write" | "preview" | "review" | "image";
 
 export default function App() {
-  const [selectedAIModel, setSelectedAIModel] = useState("");
+  const [selectedAIModel, setSelectedAIModel] = useState(() => {
+    return localStorage.getItem("selectedAIModel") || "";
+  });
+
+  useEffect(() => {
+    if (selectedAIModel) {
+      localStorage.setItem("selectedAIModel", selectedAIModel);
+    }
+  }, [selectedAIModel]);
+
   const [activeTab, setActiveTab] = useState<StepId>("topic");
   const [currentDraft, setCurrentDraft] = useState<ArticleDraft>(INITIAL_DRAFT_SEED);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -85,8 +95,11 @@ export default function App() {
 
         setAvailableModels(filtered);
         if (filtered.length > 0) {
-          if (!selectedAIModel || !filtered.some((m: any) => m.id === selectedAIModel)) {
+          const savedModel = localStorage.getItem("selectedAIModel") || "";
+          if (!savedModel || !filtered.some((m: any) => m.id === savedModel)) {
             setSelectedAIModel(filtered[0].id);
+          } else if (selectedAIModel !== savedModel) {
+            setSelectedAIModel(savedModel);
           }
         } else {
           setSelectedAIModel("");
@@ -219,36 +232,11 @@ export default function App() {
             <Cpu className="w-3.5 h-3.5 text-rose-500" />
             <span className="font-bold text-[11px]">AI 引擎选型：</span>
           </div>
-          <select
-            value={selectedAIModel}
-            onChange={(e) => setSelectedAIModel(e.target.value)}
-            className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-bold focus:outline-hidden cursor-pointer max-w-[220px] truncate"
-          >
-            {availableModels.length === 0 && (
-              <option value="" disabled>请先配置 API Key 拉取模型</option>
-            )}
-            {Object.entries(
-              availableModels.reduce((acc, m) => {
-                let group = m.provider || "其他引擎";
-                if (group === "Claude-3.5") group = "Claude";
-                if (group === "Bailian") group = "通义千问";
-                if (group === "Volcengine") group = "火山豆包";
-                if (group === "Kimi") group = "Moonshot Kimi";
-                
-                if (!acc[group]) acc[group] = [];
-                acc[group].push(m);
-                return acc;
-              }, {} as Record<string, typeof availableModels>)
-            ).map(([group, models]: [string, any[]]) => (
-              <optgroup key={group} label={`${group} 引擎 (${models.length})`}>
-                {models.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+          <ModelSelector 
+            availableModels={availableModels} 
+            selectedAIModel={selectedAIModel} 
+            setSelectedAIModel={setSelectedAIModel} 
+          />
 
 
 
@@ -329,6 +317,8 @@ export default function App() {
                 selectedAIModelName={selectedAIModelName}
                 onSelectTopic={handleSelectTopicAngle}
                 activeAngle={currentDraft.topicAngle || ""}
+                draft={currentDraft}
+                onUpdateDraftPatch={updateDraftPatch}
               />
             </div>
 

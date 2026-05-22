@@ -29,6 +29,12 @@ export interface ArticleDraft {
   wordCount: string;
   ctaText?: string;
   images?: string[]; // Array of base64 images generated
+  
+  // Step local states persisted
+  topicInput?: string;
+  aiTopics?: TopicAngle[];
+  optimizerPrompt?: string;
+  imagePrompt?: string;
 }
 
 export interface ViralTitle {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NewsItem, TopicAngle } from "../types";
+import { NewsItem, TopicAngle, ArticleDraft } from "../types";
 import { Sparkles, TrendingUp, RefreshCw, Send, CheckCircle, HelpCircle, Loader2 } from "lucide-react";
 import { apiFetch } from "../lib/api";
 
@@ -8,17 +8,20 @@ interface NewsTrendingProps {
   selectedAIModelName?: string;
   onSelectTopic: (angle: string, outline: string[]) => void;
   activeAngle: string;
+  draft: ArticleDraft;
+  onUpdateDraftPatch: (patch: Partial<ArticleDraft>) => void;
 }
 
-export default function NewsTrending({ selectedAIModel, selectedAIModelName, onSelectTopic, activeAngle }: NewsTrendingProps) {
+export default function NewsTrending({ selectedAIModel, selectedAIModelName, onSelectTopic, activeAngle, draft, onUpdateDraftPatch }: NewsTrendingProps) {
   const [trends, setTrends] = useState<NewsItem[]>([]);
   const [loadingTrends, setLoadingTrends] = useState(false);
-  const [topicInput, setTopicInput] = useState("");
-  const [aiTopics, setAiTopics] = useState<TopicAngle[]>([]);
   const [loadingTopics, setLoadingTopics] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [errorText, setErrorText] = useState("");
   const [quotaWarning, setQuotaWarning] = useState("");
+
+  const topicInput = draft.topicInput || "";
+  const aiTopics = draft.aiTopics || [];
 
   // Auto load trending news on mount
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
       });
       const data = await resp.json();
       if (data.success) {
-        setAiTopics(data.data);
+        onUpdateDraftPatch({ aiTopics: data.data });
         if (data.quotaExceeded) {
           setQuotaWarning(data.quotaReason || "内置 AI 服务限流：已自动切换到高契合度本地大纲算法，为您深度生成最佳大纲选题！");
         } else {
@@ -78,7 +81,7 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
   };
 
   const handleUseTrendAsTopic = (title: string) => {
-    setTopicInput(title);
+    onUpdateDraftPatch({ topicInput: title });
   };
 
   return (
@@ -186,7 +189,7 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
             <input
               type="text"
               value={topicInput}
-              onChange={(e) => setTopicInput(e.target.value)}
+              onChange={(e) => onUpdateDraftPatch({ topicInput: e.target.value })}
               placeholder="例如：程序员提效、夏日中医防暑、AI工具本地部署..."
               className="flex-1 px-4 py-2.5 bg-slate-500/5 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-violet-500/20"
             />

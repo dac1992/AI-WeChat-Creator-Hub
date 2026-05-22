@@ -20,10 +20,11 @@ export default function ArticleEditor({
 }: ArticleEditorProps) {
   const [generating, setGenerating] = useState(false);
   const [optimizerAction, setOptimizerAction] = useState<"润色" | "改写" | "续写">("润色");
-  const [optimizerPrompt, setOptimizerPrompt] = useState("");
   const [optimizing, setOptimizing] = useState(false);
   const [testOutput, setTestOutput] = useState("");
   const [quotaWarning, setQuotaWarning] = useState("");
+
+  const optimizerPrompt = draft.optimizerPrompt || "";
 
   const handleUpdateContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onUpdateDraftPatch({ content: e.target.value });
@@ -290,7 +291,7 @@ export default function ArticleEditor({
             <input
               type="text"
               value={optimizerPrompt}
-              onChange={(e) => setOptimizerPrompt(e.target.value)}
+              onChange={(e) => onUpdateDraftPatch({ optimizerPrompt: e.target.value })}
               placeholder="自定义要求：例如“引用古文”、“更尖锐一些”、“用周星驰式调侃...”"
               className="w-full px-3 py-2 bg-slate-500/5 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400"
             />
