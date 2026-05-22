@@ -232,7 +232,7 @@ export default function ArticleEditor({
             </div>
 
             {/* Selected Topic info bubble */}
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-150 text-[11px]">
+            <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-[11px]">
               <span className="text-[10px] font-bold block text-slate-400 uppercase mb-1">当前核心选题</span>
               <p className="font-bold text-slate-700 leading-relaxed max-h-[50px] overflow-y-auto">
                 {draft.topicAngle || "暂未关联。可一键生成默认。"}
@@ -292,13 +292,13 @@ export default function ArticleEditor({
               value={optimizerPrompt}
               onChange={(e) => setOptimizerPrompt(e.target.value)}
               placeholder="自定义要求：例如“引用古文”、“更尖锐一些”、“用周星驰式调侃...”"
-              className="w-full px-3 py-2 bg-slate-550/5 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400"
+              className="w-full px-3 py-2 bg-slate-500/5 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400"
             />
 
             <button
               onClick={handleOptimizeText}
               disabled={optimizing || !draft.content}
-              className="w-full py-2 bg-violet-650 hover:bg-violet-700 text-white font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-30"
+              className="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-30"
             >
               {optimizing ? (
                 <>
@@ -322,7 +322,7 @@ export default function ArticleEditor({
           value={draft.title}
           onChange={handleUpdateTitle}
           placeholder="【爆款】输入震撼灵魂的文章大标题..."
-          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-rose-350 focus:outline-hidden font-bold text-slate-800 text-sm rounded-lg mb-4"
+          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-rose-300 focus:outline-hidden font-bold text-slate-800 text-sm rounded-lg mb-4"
         />
 
         {/* Modular Editor Toolbelt */}

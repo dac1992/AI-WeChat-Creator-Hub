@@ -156,7 +156,7 @@ export default function WechatPreview({ draft, selectedAIModel, selectedAIModelN
                   className={`p-3 rounded-lg border text-left cursor-pointer transition-all ${
                     tpl.id === draft.selectedTemplateId
                       ? "border-slate-900 bg-slate-50 ring-1 ring-slate-900/5"
-                      : "border-slate-150 bg-white hover:bg-slate-50/20"
+                      : "border-slate-200 bg-white hover:bg-slate-50/20"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
@@ -211,7 +211,7 @@ export default function WechatPreview({ draft, selectedAIModel, selectedAIModelN
                     <div
                       key={index}
                       onClick={() => handleApplyTitle(vt.title)}
-                      className="p-3 bg-slate-50 hover:bg-indigo-50 rounded-lg border border-slate-150 hover:border-indigo-200 cursor-pointer transition-all group text-left"
+                      className="p-3 bg-slate-50 hover:bg-indigo-50 rounded-lg border border-slate-200 hover:border-indigo-200 cursor-pointer transition-all group text-left"
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide bg-indigo-100/30 px-1.5 py-0.2 rounded">
@@ -246,7 +246,7 @@ export default function WechatPreview({ draft, selectedAIModel, selectedAIModelN
                     className={`p-3 rounded-lg border cursor-pointer transition-all ${
                       isSelected
                         ? "border-rose-500 bg-rose-50/30"
-                        : "border-slate-150 bg-white hover:bg-slate-50/20"
+                        : "border-slate-200 bg-white hover:bg-slate-50/20"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -362,7 +362,7 @@ export default function WechatPreview({ draft, selectedAIModel, selectedAIModelN
                 dangerouslySetInnerHTML={{ __html: currentCompiledHTML }}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center p-20 text-slate-350 text-center gap-2">
+              <div className="flex flex-col items-center justify-center p-20 text-slate-300 text-center gap-2">
                 <LayoutTemplate className="w-12 h-12 stroke-1" />
                 <p className="text-xs">编辑器中还没有正文。请先前往【写文章】步骤通过AI一键写稿或手动调整修改。</p>
               </div>

@@ -50,6 +50,9 @@ export async function apiFetch(url: string, init?: RequestInit): Promise<Respons
       if (parsed.Bailian && parsed.Bailian.trim() !== "") {
         headers["x-bailian-api-key"] = parsed.Bailian.trim();
       }
+      if (parsed.Grsai && parsed.Grsai.trim() !== "") {
+        headers["x-grsai-api-key"] = parsed.Grsai.trim();
+      }
     }
   } catch (e) {
     console.error("apiFetch helper injection error:", e);

@@ -10,6 +10,7 @@ interface ImageWizardProps {
 }
 
 const IMAGE_MODELS_POOL = [
+  { id: "gpt-image-2", name: "Grsai (gpt-image-2)", desc: "支持全球及国内节点，生成高质量画作。" },
   { id: "gpt-image", name: "GPT-Image (DALL-E 3)", desc: "色彩表现明艳，极为擅长理解复杂的隐喻性人物与科技生活场景。" },
   { id: "volc-image", name: "火山引擎文生图", desc: "国风、国潮写实与商业排版极其精准，画面富有高级国货质感。" },
   { id: "sd-xl", name: "Stable Diffusion XL", desc: "赛博潮流前沿，擅长渲染极富冲击力的三维拟真与平面混合插画。" },
@@ -51,6 +52,14 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
 
   const getActiveKeyConfig = () => {
     switch (selectedModel) {
+      case "gpt-image-2":
+        return {
+          keyId: "Grsai",
+          name: "Grsai API Key (gpt-image-2)",
+          link: "https://grsai.ai/zh/dashboard/api-keys",
+          linkLabel: "点此获取 Grsai 秘钥",
+          placeholder: "Bearer sk-... 格式的 Grsai API Key"
+        };
       case "gpt-image":
         return {
           keyId: "ChatGPT",
@@ -189,7 +198,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
                 key={imgm.id}
                 onClick={() => setSelectedModel(imgm.id)}
                 className={`p-2 rounded-lg border text-left cursor-pointer transition-all ${
-                  selectedModel === imgm.id ? "border-amber-500 bg-amber-50/25 shadow-2xs" : "border-slate-150 hover:bg-slate-50"
+                  selectedModel === imgm.id ? "border-amber-500 bg-amber-50/25 shadow-2xs" : "border-slate-200 hover:bg-slate-50"
                 }`}
               >
                 <div className="flex items-center justify-between mb-0.5">
@@ -207,7 +216,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
           <div className="p-3 bg-amber-50/10 border border-amber-200/50 rounded-lg space-y-2.5 animate-fade-in text-left">
             <div className="flex items-center justify-between text-[11px] font-bold">
               <span className="text-[10px] font-black uppercase text-amber-800 tracking-wider flex items-center gap-1">
-                <Key className="w-3.5 h-3.5 text-amber-600 animate-pulse" /> Keys 调试与注册注册
+                <Key className="w-3.5 h-3.5 text-amber-600 animate-pulse" /> Keys 调试与绑定
               </span>
               <a 
                 href={keyConfig.link}
@@ -290,7 +299,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
               value={imagePrompt}
               onChange={(e) => setImagePrompt(e.target.value)}
               placeholder="例如：微信公众号扁平插画风格，一个坐在电脑前喝咖啡露出微笑的极简线条程序员画像，渐变背景"
-              className="w-full h-[75px] p-2 bg-slate-550/5 border border-slate-300 rounded-lg text-xs text-slate-700 placeholder-slate-400"
+              className="w-full h-[75px] p-2 bg-slate-500/5 border border-slate-300 rounded-lg text-xs text-slate-700 placeholder-slate-400"
             />
           </div>
         </div>
@@ -299,7 +308,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
           <button
             onClick={handleGenerateImage}
             disabled={generating || !imagePrompt}
-            className="w-full py-2 bg-amber-550 hover:bg-amber-650 text-white font-bold text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-35"
+            className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-35"
           >
             {generating ? (
               <>
@@ -334,7 +343,7 @@ export default function ImageWizard({ draft, onUpdateDraftPatch, onNavigateToPre
           )}
         </div>
 
-        <div className="flex-1 overflow-hidden flex items-center justify-center bg-slate-50 border border-slate-150 rounded-xl relative p-4 mb-4">
+        <div className="flex-1 overflow-hidden flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl relative p-4 mb-4">
           {generating ? (
             <div className="text-center text-slate-400 space-y-3">
               <Loader2 className="w-10 h-10 animate-spin text-amber-500 mx-auto" />

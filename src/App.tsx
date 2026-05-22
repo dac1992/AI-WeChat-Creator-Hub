@@ -282,7 +282,7 @@ export default function App() {
                     className={`w-full p-2.5 rounded-xl text-left border cursor-pointer transition-all flex items-start gap-3 relative overflow-hidden group ${
                       isActive
                         ? "bg-[#FFF0F2] border-[#FFD3D9] text-rose-900 font-bold"
-                        : "bg-white border-slate-100 hover:border-slate-350 text-slate-500"
+                        : "bg-white border-slate-100 hover:border-slate-300 text-slate-500"
                     }`}
                   >
                     {isActive && (
@@ -323,16 +323,16 @@ export default function App() {
         {/* Right column: Dynamic rendering main stage wrapper */}
         <main className="xl:col-span-3 space-y-4">
           <div className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-xs transition-transform duration-300">
-            {activeTab === "topic" && (
+            <div className={activeTab === "topic" ? "" : "hidden"}>
               <NewsTrending
                 selectedAIModel={selectedAIModel}
                 selectedAIModelName={selectedAIModelName}
                 onSelectTopic={handleSelectTopicAngle}
                 activeAngle={currentDraft.topicAngle || ""}
               />
-            )}
+            </div>
 
-            {activeTab === "write" && (
+            <div className={activeTab === "write" ? "" : "hidden"}>
               <ArticleEditor
                 draft={currentDraft}
                 selectedAIModel={selectedAIModel}
@@ -340,32 +340,32 @@ export default function App() {
                 onUpdateDraftPatch={updateDraftPatch}
                 onNavigateToPreview={() => setActiveTab("preview")}
               />
-            )}
+            </div>
 
-            {activeTab === "preview" && (
+            <div className={activeTab === "preview" ? "" : "hidden"}>
               <WechatPreview
                 draft={currentDraft}
                 selectedAIModel={selectedAIModel}
                 selectedAIModelName={selectedAIModelName}
                 onUpdateDraftPatch={updateDraftPatch}
               />
-            )}
+            </div>
 
-            {activeTab === "review" && (
+            <div className={activeTab === "review" ? "" : "hidden"}>
               <ReviewIntelligence
                 draft={currentDraft}
                 selectedAIModel={selectedAIModel}
                 onUpdateDraftPatch={updateDraftPatch}
               />
-            )}
+            </div>
 
-            {activeTab === "image" && (
+            <div className={activeTab === "image" ? "" : "hidden"}>
               <ImageWizard
                 draft={currentDraft}
                 onUpdateDraftPatch={updateDraftPatch}
                 onNavigateToPreview={() => setActiveTab("preview")}
               />
-            )}
+            </div>
           </div>
           
           {/* Footer branding details and security reminders */}

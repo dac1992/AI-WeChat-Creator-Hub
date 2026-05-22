@@ -897,8 +897,51 @@ app.post("/api/image/generate", async (req, res) => {
   const customOpenAiKey = req.headers["x-openai-api-key"] as string | undefined;
   const customVolcengineKey = req.headers["x-volcengine-api-key"] as string | undefined;
   const customStabilityKey = req.headers["x-stability-api-key"] as string | undefined;
+  const customGrsaiKey = req.headers["x-grsai-api-key"] as string | undefined;
 
   // Let's enforce that users must supply their private Keys depending on model selected
+  if (model === "gpt-image-2") {
+    if (!customGrsaiKey || customGrsaiKey.trim() === "") {
+      return res.status(400).json({ error: "您尚未配置 Grsai API 密钥，拒绝调用图文配图生图功能！请去设置页绑定后重试。" });
+    }
+
+    try {
+      let resolution = "1024x1024";
+      if (aspectRatio === "16:9") resolution = "1672x941";
+      else if (aspectRatio === "9:16") resolution = "941x1672";
+      else if (aspectRatio === "4:3") resolution = "1443x1090";
+      else if (aspectRatio === "3:4") resolution = "1090x1443";
+
+      const grsaiRes = await fetch("https://grsaiapi.com/v1/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": customGrsaiKey.trim().startsWith("Bearer ") ? customGrsaiKey.trim() : `Bearer ${customGrsaiKey.trim()}`
+        },
+        body: JSON.stringify({
+          model: "gpt-image-2",
+          prompt: `A beautiful WeChat public account article editorial flat simple illustration art: ${prompt}`,
+          images: [],
+          aspectRatio: resolution,
+          replyType: "json"
+        })
+      });
+
+      if (!grsaiRes.ok) {
+        const errText = await grsaiRes.text();
+        return res.status(400).json({ error: `Grsai (gpt-image-2) 绘图错误: ${errText}` });
+      }
+
+      const grsaiData: any = await grsaiRes.json();
+      if (grsaiData.status === "succeeded" && grsaiData.results && grsaiData.results[0] && grsaiData.results[0].url) {
+        return res.json({ success: true, imageUrl: grsaiData.results[0].url, model: "Grsai (gpt-image-2)" });
+      }
+      return res.status(500).json({ error: `Grsai 接口未返回有效的链接结构(${grsaiData.status || "no status"}): ${grsaiData.error || ""}` });
+    } catch (err: any) {
+      return res.status(400).json({ error: `Grsai 网络连接失败: ${err.message || err}` });
+    }
+  }
+
   if (model === "gpt-image") {
     if (!customOpenAiKey || customOpenAiKey.trim() === "") {
       return res.status(400).json({ error: "您尚未配置 OpenAI (DALL-E 3) API 密钥，拒绝调用图文配图生图功能！请导入秘钥保存后再生图。" });

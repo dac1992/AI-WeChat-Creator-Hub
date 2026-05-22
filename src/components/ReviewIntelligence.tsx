@@ -166,7 +166,7 @@ export default function ReviewIntelligence({ draft, selectedAIModel, onUpdateDra
           ) : result ? (
             <div className="space-y-4 text-left">
               {/* Verdict banner */}
-              <div className="p-3 bg-indigo-50/50 border border-indigo-150 rounded-lg text-[12px] text-indigo-950 leading-relaxed">
+              <div className="p-3 bg-indigo-50/50 border border-indigo-200 rounded-lg text-[12px] text-indigo-950 leading-relaxed">
                 <span className="font-bold text-indigo-900 block mb-1">📝 智能体诊断总评：</span>
                 {result.verdict}
               </div>
@@ -178,7 +178,7 @@ export default function ReviewIntelligence({ draft, selectedAIModel, onUpdateDra
                   {result.findings.map((item, index) => (
                     <div
                       key={index}
-                      className="p-3.5 rounded-xl border border-slate-150 bg-white hover:border-violet-350 transition-all flex flex-col gap-2 relative group"
+                      className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-violet-300 transition-all flex flex-col gap-2 relative group"
                     >
                       {/* Original Sentence red line */}
                       <div className="text-[12px] bg-rose-50/30 border-l-4 border-rose-500 p-2 text-rose-950">
@@ -223,8 +223,8 @@ export default function ReviewIntelligence({ draft, selectedAIModel, onUpdateDra
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-450 text-center gap-2">
-              <ShieldCheck className="w-12 h-12 stroke-1 text-slate-350" />
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 text-center gap-2">
+              <ShieldCheck className="w-12 h-12 stroke-1 text-slate-300" />
               <p className="text-xs">智能纠错库随时待命。</p>
               <p className="text-[11px] max-w-xs text-slate-400">
                 本系统会将文章正文提交给 AI 审查智能体，深度匹配上千个AI经典雷区句段，输出可视化测评报告。

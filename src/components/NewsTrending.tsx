@@ -144,7 +144,7 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
                 onClick={() => handleUseTrendAsTopic(item.title)}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-550/10 text-rose-600">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/10 text-rose-600">
                     TOP {idx + 1}
                   </span>
                   <span className="text-[12px] font-mono text-slate-500 flex items-center gap-1">
@@ -188,12 +188,12 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
               value={topicInput}
               onChange={(e) => setTopicInput(e.target.value)}
               placeholder="例如：程序员提效、夏日中医防暑、AI工具本地部署..."
-              className="flex-1 px-4 py-2.5 bg-slate-550/5 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-violet-500/20"
+              className="flex-1 px-4 py-2.5 bg-slate-500/5 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-violet-500/20"
             />
             <button
               onClick={handleSuggestTopics}
               disabled={loadingTopics || !topicInput.trim()}
-              className="px-4 py-2.5 bg-violet-650 hover:bg-violet-700 text-white font-medium text-xs rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
+              className="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
             >
               {loadingTopics ? (
                 <>
@@ -235,7 +235,7 @@ export default function NewsTrending({ selectedAIModel, selectedAIModelName, onS
                     className={`p-4 rounded-xl border transition-all cursor-pointer relative group text-left ${
                       isCurrentActive
                         ? "border-violet-600 bg-violet-50/30 ring-1 ring-violet-500/20"
-                        : "border-slate-150 bg-white hover:border-violet-300 hover:bg-slate-50/20"
+                        : "border-slate-200 bg-white hover:border-violet-300 hover:bg-slate-50/20"
                     }`}
                   >
                     {isCurrentActive && (

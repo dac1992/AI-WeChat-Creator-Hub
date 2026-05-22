@@ -129,7 +129,7 @@ export default function DraftsDrawer({ currentDraft, onLoadDraft, onSaveCurrent 
                   className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between gap-3 group ${
                     worksOnCurrent
                       ? "border-rose-500 bg-rose-50/25 ring-1 ring-rose-300"
-                      : "border-slate-150 hover:border-slate-300 hover:bg-slate-50"
+                      : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   <div className="flex items-start gap-1.5 min-w-0 flex-1">

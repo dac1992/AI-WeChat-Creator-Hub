@@ -73,6 +73,14 @@ const API_PROVIDERS = [
     link: "https://platform.stability.ai/",
     placeholder: "sk-... 格式的 Stability API 秘钥",
     iconColor: "text-purple-600 bg-purple-50"
+  },
+  {
+    id: "Grsai",
+    name: "Grsai (gpt-image-2)",
+    desc: "支持全球及国内节点，生成高质量画作。",
+    link: "https://grsai.ai/zh/dashboard/api-keys",
+    placeholder: "Bearer sk-... 格式的 Grsai API Key",
+    iconColor: "text-indigo-500 bg-indigo-50"
   }
 ];
 
@@ -146,6 +154,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
       if (providerId === "Kimi") headers["x-kimi-api-key"] = keyVal;
       if (providerId === "Bailian") headers["x-bailian-api-key"] = keyVal;
       if (providerId === "Volcengine") headers["x-volcengine-api-key"] = keyVal;
+      if (providerId === "Grsai") headers["x-grsai-api-key"] = keyVal;
 
       const resp = await fetch("/api/models/list-by-provider", {
         method: "POST",
@@ -273,7 +282,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
                 <div 
                   key={provider.id} 
                   className={`p-4 rounded-xl border transition-all text-left ${
-                    value ? "border-indigo-150 bg-indigo-50/5" : "border-slate-150 hover:border-slate-300"
+                    value ? "border-indigo-200 bg-indigo-50/5" : "border-slate-200 hover:border-slate-300"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4 mb-2">
@@ -342,7 +351,7 @@ export default function SettingsModal({ isOpen, onClose, onKeysUpdated }: Settin
                   </div>
 
                   {/* Input wrapper */}
-                  <div className="relative flex items-center mt-2 bg-slate-50 border border-slate-200 rounded-lg focus-within:border-slate-450 overflow-hidden">
+                  <div className="relative flex items-center mt-2 bg-slate-50 border border-slate-200 rounded-lg focus-within:border-slate-400 overflow-hidden">
                     <input 
                       type={isValueVisible ? "text" : "password"}
                       value={value}
